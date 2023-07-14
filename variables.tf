@@ -1,9 +1,3 @@
-#Count of the EC2 Instances
-variable "instance-count" {
-  default = "2"
-
-}
-
 #Availability Zones
 variable "availability-zone" {
   type    = list(string)
