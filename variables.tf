@@ -1,3 +1,23 @@
+#Region
+variable "region" {
+  default = "ap-south-1"
+}
+
+#AMI Id
+variable "ami_id" {
+  default = "ami-0d13e3e640877b0b9"
+}
+
+#Instance Type
+variable "instance_type" {
+  default = "t2.micro"
+}
+
+#Key-Pair
+variable "key-pair-name" {
+  default = "terraform"
+}
+
 #Availability Zones
 variable "availability-zone" {
   type    = list(string)

@@ -9,30 +9,23 @@ terraform {
 
 provider "aws" {
   profile = "default"
-  region  = "ap-south-1"
+  region  = var.region
 }
 
 resource "aws_instance" "web-server" {
-  count                  = length(var.availability-zone)
-  ami                    = "ami-0d13e3e640877b0b9"
-  instance_type          = "t2.micro"
-  availability_zone      = var.availability-zone[count.index]
+  count                  = length(data.aws_availability_zones.available.names)
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  availability_zone      = data.aws_availability_zones.available.names[count.index]
   vpc_security_group_ids = [aws_security_group.web-security-group.id]
-  key_name               = "terraform"
+  key_name               = var.key-pair-name
   root_block_device {
     volume_size = var.volume_size
   }
-  user_data = file("ec2-user-data.sh")
 
   tags = {
-    name = "web-server-${count.index}"
+    Name = "web-server-${count.index + 1}"
   }
-
-}
-
-resource "aws_key_pair" "key-pair" {
-  key_name   = "terraform"
-  public_key = file("public-key.txt")
 
 }
 
@@ -72,7 +65,7 @@ resource "aws_lb" "web-load-balancer" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.web-security-group.id]
-  subnets            = var.subnet-id
+  subnets            = data.aws_subnets.default_vpc_subnets.ids
 
 }
 
@@ -80,11 +73,7 @@ resource "aws_lb_target_group" "web-lb-target-group" {
   name     = "web-lb-target-group"
   port     = "80"
   protocol = "HTTP"
-  vpc_id   = aws_default_vpc.main.id
-
-}
-
-resource "aws_default_vpc" "main" {
+  vpc_id   = data.aws_vpc.default.id
 
 }
 
