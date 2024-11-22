@@ -1,71 +1,49 @@
-# Two-Tier Web Server with AWS ALB and EC2 Instances
+# Web Server Setup with EC2 Instance
 
-This Terraform project deploys a two-tier web server architecture on AWS. The infrastructure includes an Application Load Balancer (ALB) for distributing traffic and EC2 instances as web servers. The project is designed to be scalable and highly available.
+This project deploys a simple web server on an AWS EC2 instance. It uses a user-data script to automatically install and configure the web server upon instance launch. The setup can be used for basic websites, web applications, or testing environments.
 
 ## Prerequisites
 
-* Terraform installed on your local machine.
-* AWS account with appropriate IAM permissions for managing ALB, EC2, VPC, security groups, and IAM roles.
+1. **AWS Account**: Required to create and manage AWS resources.
+2. **IAM Role/Policy**: An IAM role with permissions to launch EC2 instances and access security groups, VPCs, and S3 (optional for logs or storage).
+3. **AWS CLI (optional)**: For managing and interacting with AWS services via command line.
+4. **SSH Key Pair**: Used for SSH access to the EC2 instance.
 
 ## Architecture
 
-* **Application Load Balancer (ALB)**: Distributes incoming traffic to web server instances.
-* **EC2 Instances**: Act as web servers to handle application logic and serve content.
-* **Security Groups**: Ensures secure communication within and outside of the network.
+The setup includes:
 
-## Usage
+- An EC2 instance
+- A user-data script to automate the installation of a web server
+- Security Group to allow HTTP 
 
-### 1. Clone the Repository
+# Setup Instructions
 
-```bash
-git clone <repository-url>
-cd <repository-directory>
-```
+## Step 1: Configure the Security Group
+- In the AWS Console, create a Security Group to allow HTTP (port 80) and SSH (port 22) traffic.
+- Attach the Security Group to your EC2 instance in Step 2.
 
-### 2. Initialize Terraform
+## Step 2: Launch EC2 Instance with User Data
+1. Go to the EC2 dashboard in the AWS Console.
+2. Click **Launch Instance** and select an Amazon Linux 2 or Ubuntu 20.04 AMI.
+3. Choose an instance type (e.g., `t2.micro` for free tier).
+4. Configure instance details:
+   - Select your VPC and subnet.
+   - In the **User data** section, paste the user-data script above.
+   - Choose or create a Key Pair to SSH into your instance.
+   - Assign the Security Group created in Step 1.
+5. Review and launch the instance.
 
-  Run `terraform init` to install necessary providers and modules.
+## Step 3: Access the Web Server
+- After the instance starts, navigate to the instance details page in the EC2 Console.
+- Find the **Public IP** or **Public DNS** of the instance.
+- Open a web browser and enter the Public IP/DNS. You should see the sample web page.
 
-### 3. Set Up AWS Credentials
+# Notes
 
-Configure your AWS credentials by setting environment variables or using an AWS credentials file.
+- The user-data script runs only on the first boot. To re-run it, the instance must be stopped, modified, or re-launched with new user-data.
+- Security configurations, such as limiting IPs for SSH access, should be carefully managed for production environments.
 
-### 4. Apply Terraform Configuration
-Execute the following command to deploy the infrastructure:
+## Cleanup
 
-```bash
-terraform apply
-```
-
-Type `yes` to confirm the changes.
-
-### 5. Verify Deployment
-
-- Once deployment is complete, the ALB DNS name will be displayed. Use this DNS to access the web application.
-- Verify the EC2 instances are registered with the ALB.
-
-### 6. Destroy Resources
-
-To tear down the infrastructure, run:
-
-```bash
-terraform destroy
-```
-
-## Variables
-
-The following variables can be customized in the `terraform.tfvars` file:
-
-* `region`: AWS region for deployment.
-* `instance_type`: EC2 instance type for web servers.
-* `alb_listener_port`: Port for the ALB listener (default: 80).
-* `webserver_ami_id`: AMI ID for the EC2 instances.
-
-Refer to `variables.tf` for a complete list of configurable parameters.
-
-## Outputs
-
-The following outputs are available after deployment:
-
-* `alb_dns`: DNS name of the Application Load Balancer.
-* `instance_ids`: IDs of the deployed EC2 instances.
+- To avoid charges, remember to terminate your EC2 instance after testing.
